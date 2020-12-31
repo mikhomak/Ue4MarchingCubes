@@ -10,7 +10,16 @@
 		}
 	],
 	"settings": {
-		"typescript.tsc.autoDetect": "off"
+		"typescript.tsc.autoDetect": "off",
+		"files.associations": {
+			"deque": "cpp",
+			"hash_map": "cpp",
+			"hash_set": "cpp",
+			"list": "cpp",
+			"map": "cpp",
+			"set": "cpp",
+			"vector": "cpp"
+		}
 	},
 	"extensions": {
 		"recommendations": [
