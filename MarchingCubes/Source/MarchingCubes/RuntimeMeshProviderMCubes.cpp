@@ -1,5 +1,5 @@
 
-#include "MarchingCubes/RuntimeMeshProviderMCubes.h"
+#include "RuntimeMeshProviderMCubes.h"
 
 FVector URuntimeMeshProviderMCubes::GetBoxRadius() const
 {
