@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "RuntimeMeshProvider.h"
-#include "URuntimeMeshProviderMCubes.generated.h"
+#include "RuntimeMeshProviderMCubes.generated.h"
 
 UCLASS(HideCategories = Object, BlueprintType)
 class URuntimeMeshProviderMCubes : public URuntimeMeshProvider
