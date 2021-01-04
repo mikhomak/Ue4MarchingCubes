@@ -11,24 +11,27 @@ UMCube::UMCube()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	BoxLength = 50.f;
+	Threshold = 0.5f;
+	Scale = 200.f;
 	// ...
 }
 
 
 void UMCube::GenerateMap()
 {
-	Normals.Init(FVector(0, 0, 1), VerticesArraySize);
-	Tangents.Init(FRuntimeMeshTangent(0, -1, 0), VerticesArraySize);
-	UV.Init(FVector2D(0, 0), VerticesArraySize);
-	VertexColors.Init(FColor::White, VerticesArraySize);
+
 
 	GenerateVertices();
+	Normals.Init(FVector(0, 0, 1), Vertices.Num());
+	Tangents.Init(FRuntimeMeshTangent(0, -1, 0),  Vertices.Num());
+	UV.Init(FVector2D(0, 0),  Vertices.Num());
+	VertexColors.Init(FColor::White,  Vertices.Num());
 	//GenerateTriangles();
 	GenerateMesh();
 }
 
 void UMCube::GenerateVertices() {
-	Vertices.Init(FVector(0, 0, 0), VerticesArraySize);
+	//Vertices.Init(FVector(0, 0, 0), VerticesArraySize);
 	for(int32 y = 0; y < 10; y++)
 	{
 		for(int32 x = 0; x < 10; x++)
@@ -41,60 +44,6 @@ void UMCube::GenerateVertices() {
 					Points[i] = FVector4();
 				}
 				int Index = GetTriangulationIndexForCube(x, y, z, Points);
-/* 				if (edgeTable[Index] == 0)
-				{
-					return;
-				}
- */
-/* 
-				if (edgeTable[Index] & 1)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[1])));
-				}
-				if (edgeTable[Index] & 2)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[1], Points[2])));
-				}
-				if (edgeTable[Index] & 4)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[2], Points[3])));
-				}
-				if (edgeTable[Index] & 8)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[3], Points[0])));
-				}
-				if (edgeTable[Index] & 16)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[4], Points[5])));
-				}
-				if (edgeTable[Index] & 32)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[5], Points[6])));
-				}
-				if (edgeTable[Index] & 64)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[6], Points[7])));
-				}
-				if (edgeTable[Index] & 128)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[7], Points[4])));
-				}
-				if (edgeTable[Index] & 256)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[4])));
-				}
-				if (edgeTable[Index] & 512)
-				{
-					Vertices.add(VertexInterp(InterpolateVerts(Points[1], Points[5])));
-				}
-				if (edgeTable[Index] & 1024)
-				{
-					
-				}
-				if (edgeTable[Index] & 2048)
-				{
-					
-				} */
 
 
 				for(int32 i = 0; triangulation[Index][i] != -1; i +=3)
@@ -107,27 +56,84 @@ void UMCube::GenerateVertices() {
 
 					int a2 = cornerIndexAFromEdge[triangulation[Index][i+2]];
 					int b2 = cornerIndexBFromEdge[triangulation[Index][i+2]];
-					Vertices.Add(InterpolateVerts(Points[a0], Points[b0]));
-					Vertices.Add(InterpolateVerts(Points[a1], Points[b1]));
-					Vertices.Add(InterpolateVerts(Points[a2], Points[b2]));
-					Triangles.Add(y+x+z+i);
-					Triangles.Add(y+x+z+i+1);
-					Triangles.Add(y+x+z+i+2);
+					Triangles.Add(Vertices.Add(InterpolateVerts(Points[a0], Points[b0])));
+					Triangles.Add(Vertices.Add(InterpolateVerts(Points[a1], Points[b1])));
+					Triangles.Add(Vertices.Add(InterpolateVerts(Points[a2], Points[b2])));
 				}
 			}
 
 		}
 	}
 
-	/* 	for (int y = 0; y < NoiseSamplesPerLine; y++) {
-			for (int x = 0; x < NoiseSamplesPerLine; x++) {
+/* 	for (int y = 0; y < NoiseSamplesPerLine; y++) {
+		for (int x = 0; x < NoiseSamplesPerLine; x++) {
 				float NoiseResult = GetNoiseValueForGridCoordinates(x, y);
 				int index = GetIndexForGridCoordinates(x, y);
 				FVector2D Position = GetPositionForGridCoordinates(x, y);
 				Vertices[index] = FVector(Position.X, Position.Y, NoiseResult);
 				UV[index] = FVector2D(x, y);
-			}
-		} */
+		}
+	} */
+}
+
+void UMCube::ConstructCube(FVector4 (&PointsOut)[8])
+{
+	int Index = GetTriangulationIndexForCube(x, y, z, Points);
+	if (edgeTable[Index] & 1)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[1])));
+	}
+	if (edgeTable[Index] & 2)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[1], Points[2])));
+	}
+	if (edgeTable[Index] & 4)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[2], Points[3])));
+	}
+	if (edgeTable[Index] & 8)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[3], Points[0])));
+	}
+	if (edgeTable[Index] & 16)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[4], Points[5])));
+	}
+	if (edgeTable[Index] & 32)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[5], Points[6])));
+	}
+	if (edgeTable[Index] & 64)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[6], Points[7])));
+	}
+	if (edgeTable[Index] & 128)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[7], Points[4])));
+	}
+	if (edgeTable[Index] & 256)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[4])));
+	}
+	if (edgeTable[Index] & 512)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[1], Points[5])));
+	}
+	if (edgeTable[Index] & 1024)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[2], Points[6])));
+	}
+	if (edgeTable[Index] & 2048)
+	{
+		Vertices.add(VertexInterp(InterpolateVerts(Points[3], Points[7])));
+	}
+
+	for (i=0;triTable[cubeindex][i]!=-1;i+=3)
+	{
+      Triangles.Add(Vertices[triangulation[Index][i  ]]);
+      triangles[ntriang].p[1] = Vertices[triangulation[Index][i+1]];
+      triangles[ntriang].p[2] = Vertices[triangulation[Index][i+2]];
+   }
 }
 
 FVector UMCube::InterpolateVerts(FVector4& FirstCorner, FVector4& SecondCorner) {
@@ -271,7 +277,11 @@ float UMCube::GetNoiseValueForGridCoordinates(int32 x, int32 y, int32 z) {
 		(x * NoiseInputScale) + 0.1,
 		(y * NoiseInputScale) + 0.1,
 		(z * NoiseInputScale) + 0.1
-	);
+	) * Scale;
+}
+
+int UMCube::GetIndexForGridCoordinates(int x, int y, int z) {
+	return x + y * NoiseSamplesPerLine + z * NoiseSamplesPerLine;
 }
 
 int UMCube::GetIndexForGridCoordinates(int x, int y) {
@@ -284,6 +294,15 @@ FVector2D UMCube::GetPositionForGridCoordinates(int x, int y) {
 		y * NoiseResolution
 	);
 }
+
+FVector UMCube::GetPositionForGridCoordinates(int x, int y, int z) {
+	return FVector2D(
+		x * NoiseResolution,
+		y * NoiseResolution,
+		z * NoiseResolution
+	);
+}
+
 
 // Called when the game starts
 void UMCube::BeginPlay()
