@@ -18,7 +18,8 @@
 			"list": "cpp",
 			"map": "cpp",
 			"set": "cpp",
-			"vector": "cpp"
+			"vector": "cpp",
+			"*.ipp": "cpp"
 		}
 	},
 	"extensions": {

@@ -10,6 +10,7 @@ UMCube::UMCube()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	BoxLength = 50.f;
 	// ...
 }
 
@@ -22,7 +23,7 @@ void UMCube::GenerateMap()
 	VertexColors.Init(FColor::White, VerticesArraySize);
 
 	GenerateVertices();
-	GenerateTriangles();
+	//GenerateTriangles();
 	GenerateMesh();
 }
 
@@ -34,12 +35,85 @@ void UMCube::GenerateVertices() {
 		{
 			for(int32 z = 0; z < 10; z++)
 			{
-				int32 CubeIndex = 0;
-				for(int32 i = 0; i < 8; i++)
+				FVector4 Points[8];
+				for(int i = 0; i < 8; i++)
 				{
-					if(cube.values[i] < )
+					Points[i] = FVector4();
 				}
-				float Value = Noise->GetValue(x, y, z);
+				int Index = GetTriangulationIndexForCube(x, y, z, Points);
+/* 				if (edgeTable[Index] == 0)
+				{
+					return;
+				}
+ */
+/* 
+				if (edgeTable[Index] & 1)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[1])));
+				}
+				if (edgeTable[Index] & 2)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[1], Points[2])));
+				}
+				if (edgeTable[Index] & 4)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[2], Points[3])));
+				}
+				if (edgeTable[Index] & 8)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[3], Points[0])));
+				}
+				if (edgeTable[Index] & 16)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[4], Points[5])));
+				}
+				if (edgeTable[Index] & 32)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[5], Points[6])));
+				}
+				if (edgeTable[Index] & 64)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[6], Points[7])));
+				}
+				if (edgeTable[Index] & 128)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[7], Points[4])));
+				}
+				if (edgeTable[Index] & 256)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[4])));
+				}
+				if (edgeTable[Index] & 512)
+				{
+					Vertices.add(VertexInterp(InterpolateVerts(Points[1], Points[5])));
+				}
+				if (edgeTable[Index] & 1024)
+				{
+					
+				}
+				if (edgeTable[Index] & 2048)
+				{
+					
+				} */
+
+
+				for(int32 i = 0; triangulation[Index][i] != -1; i +=3)
+				{
+					int a0 = cornerIndexAFromEdge[triangulation[Index][i]];
+					int b0 = cornerIndexBFromEdge[triangulation[Index][i]];
+
+					int a1 = cornerIndexAFromEdge[triangulation[Index][i+1]];
+					int b1 = cornerIndexBFromEdge[triangulation[Index][i+1]];
+
+					int a2 = cornerIndexAFromEdge[triangulation[Index][i+2]];
+					int b2 = cornerIndexBFromEdge[triangulation[Index][i+2]];
+					Vertices.Add(InterpolateVerts(Points[a0], Points[b0]));
+					Vertices.Add(InterpolateVerts(Points[a1], Points[b1]));
+					Vertices.Add(InterpolateVerts(Points[a2], Points[b2]));
+					Triangles.Add(y+x+z+i);
+					Triangles.Add(y+x+z+i+1);
+					Triangles.Add(y+x+z+i+2);
+				}
 			}
 
 		}
@@ -56,9 +130,16 @@ void UMCube::GenerateVertices() {
 		} */
 }
 
-int32 UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z)
+FVector UMCube::InterpolateVerts(FVector4& FirstCorner, FVector4& SecondCorner) {
+    const float t = (Threshold - FirstCorner.W) / (SecondCorner.W - FirstCorner.W);
+	FirstCorner *= BoxLength;
+	SecondCorner *= BoxLength;
+    return FVector(FirstCorner + t * (SecondCorner - FirstCorner));
+}
+
+int UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z, FVector4 (&PointsOut)[8])
 {
-	int32 Index = 0;
+	int Index = 0;
 	//      4--------5
 	//     /|       /|
 	//    / |      / |
@@ -70,44 +151,60 @@ int32 UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z)
 	//   3--------2
 
 	// 0
-	if(GetNoiseValueForGridCoordinates(x,y,z) > Threshold)
+	float Value = GetNoiseValueForGridCoordinates(x,y,z);
+	PointsOut[0] = FVector4(x, y ,z, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 0;
+		Index |=  1;
 	}
 	// 1
-	if(GetNoiseValueForGridCoordinates(x + 1, y, z) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x + 1, y, z);
+	PointsOut[1] = FVector4(x + 1, y, z, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 1;
+		Index |=  2;
 	}
 	// 2
-	if(GetNoiseValueForGridCoordinates(x + 1, y + 1, z) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x + 1, y + 1, z);
+	PointsOut[2] = FVector4(x + 1, y + 1, z, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 2;
+		Index |=  4;
 	}
 	// 3
-	if(GetNoiseValueForGridCoordinates(x,y + 1,z) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x, y + 1, z);
+	PointsOut[3] = FVector4(x, y + 1, z, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 3;
+		Index |=  8;
 	}
 	// 4
-	if(GetNoiseValueForGridCoordinates(x,y,z + 1) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x, y, z + 1);
+	PointsOut[4] = FVector4(x, y ,z, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 4;
+		Index |=  16;
 	}
 	// 5
-	if(GetNoiseValueForGridCoordinates(x + 1,y ,z + 1) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x + 1,y ,z + 1);
+	PointsOut[5] = FVector4(x + 1,y ,z + 1, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 5;
+		Index |=  32;
 	}
 	// 6
-	if(GetNoiseValueForGridCoordinates(x + 1, y + 1, z + 1) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x + 1, y + 1, z + 1);
+	PointsOut[6] = FVector4(x + 1, y + 1, z + 1, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 6;
+		Index |= 64;
 	}
 	// 7
-	if(GetNoiseValueForGridCoordinates(x,y + 1, z + 1) > Threshold)
+	Value = GetNoiseValueForGridCoordinates(x,y + 1, z + 1);
+	PointsOut[7] = FVector4(x,y + 1, z + 1, Value);
+	if(Value < Threshold)
 	{
-		Index |= 1 << 7;
+		Index |= 128;
 	}
 
 	return Index;
@@ -209,7 +306,7 @@ void UMCube::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 
 float UMCube::Perlin3D(float x, float y, float z)
 {
-	float ab = Mathf.PerlinNoise(x, y);
+/* 	float ab = Mathf.PerlinNoise(x, y);
 	float bc = Mathf.PerlinNoise(y, z);
 	float ac = Mathf.PerlinNoise(x, z);
 
@@ -218,5 +315,6 @@ float UMCube::Perlin3D(float x, float y, float z)
 	float ca = Mathf.PerlinNoise(z, x);
 
 	float abc = ab + bc + ac + ba + cb + ca;
-	return abc / 6f;
+	return abc / 6f; */
+	return 0.f;
 }
