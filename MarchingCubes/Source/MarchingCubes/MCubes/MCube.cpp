@@ -13,6 +13,10 @@ UMCube::UMCube()
 	BoxLength = 50.f;
 	Threshold = 0.5f;
 	Scale = 200.f;
+
+
+	PointsPerAxis = 30;
+	NumPoints = PointsPerAxis * PointsPerAxis * PointsPerAxis;
 	// ...
 }
 
@@ -78,7 +82,7 @@ void UMCube::GenerateVertices() {
 
 void UMCube::ConstructCube(FVector4 (&PointsOut)[8])
 {
-	int Index = GetTriangulationIndexForCube(x, y, z, Points);
+/* 	int Index = GetTriangulationIndexForCube(x, y, z, Points);
 	if (edgeTable[Index] & 1)
 	{
 		Vertices.add(VertexInterp(InterpolateVerts(Points[0], Points[1])));
@@ -127,13 +131,13 @@ void UMCube::ConstructCube(FVector4 (&PointsOut)[8])
 	{
 		Vertices.add(VertexInterp(InterpolateVerts(Points[3], Points[7])));
 	}
-
-	for (i=0;triTable[cubeindex][i]!=-1;i+=3)
+ */
+/* 	for (i=0;triTable[cubeindex][i]!=-1;i+=3)
 	{
       Triangles.Add(Vertices[triangulation[Index][i  ]]);
       triangles[ntriang].p[1] = Vertices[triangulation[Index][i+1]];
       triangles[ntriang].p[2] = Vertices[triangulation[Index][i+2]];
-   }
+   } */
 }
 
 FVector UMCube::InterpolateVerts(FVector4& FirstCorner, FVector4& SecondCorner) {
@@ -274,14 +278,14 @@ float UMCube::GetNoiseValueForGridCoordinates(int x, int y) {
 
 float UMCube::GetNoiseValueForGridCoordinates(int32 x, int32 y, int32 z) {
 	return Noise->GetValue(
-		(x * NoiseInputScale) + 0.1,
-		(y * NoiseInputScale) + 0.1,
-		(z * NoiseInputScale) + 0.1
+		(x * NoiseInputScale),
+		(y * NoiseInputScale),
+		(z * NoiseInputScale)
 	) * Scale;
 }
 
 int UMCube::GetIndexForGridCoordinates(int x, int y, int z) {
-	return x + y * NoiseSamplesPerLine + z * NoiseSamplesPerLine;
+	return x + y * NoiseSamplesPerLine + z * NoiseSamplesPerLine * NoiseSamplesPerLine;
 }
 
 int UMCube::GetIndexForGridCoordinates(int x, int y) {
@@ -296,7 +300,7 @@ FVector2D UMCube::GetPositionForGridCoordinates(int x, int y) {
 }
 
 FVector UMCube::GetPositionForGridCoordinates(int x, int y, int z) {
-	return FVector2D(
+	return FVector(
 		x * NoiseResolution,
 		y * NoiseResolution,
 		z * NoiseResolution

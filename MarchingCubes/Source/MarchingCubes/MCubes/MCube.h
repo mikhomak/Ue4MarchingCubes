@@ -26,6 +26,29 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GenerateMap();
 
+
+
+
+	UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int PointsPerAxis;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int NumPoints;
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/** Array of the vertices of the object */
 	UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	TArray<FVector> Vertices;
@@ -74,7 +97,7 @@ public:
 	int GetIndexForGridCoordinates(int x, int y);
 	int GetIndexForGridCoordinates(int x, int y, int z);
 	FVector2D GetPositionForGridCoordinates(int x, int y);
-	FVector2D GetPositionForGridCoordinates(int x, int y, int z);
+	FVector GetPositionForGridCoordinates(int x, int y, int z);
 
 	// Other things needed to generate the mesh
 	TArray<FVector> Normals;
