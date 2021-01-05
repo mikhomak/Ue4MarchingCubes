@@ -9,7 +9,9 @@ UMCube::UMCube()
 	Threshold = 0.5f;
 	Scale = 200.f;
 
-	Iterations = 10;
+	XScale = 30;
+	ZScale = 30;
+	YScale = 30;
 }
 
 
@@ -18,20 +20,19 @@ void UMCube::GenerateMap()
 
 
 	GenerateVertices();
-	Normals.Init(FVector(0, 0, 1), Vertices.Num());
-	Tangents.Init(FRuntimeMeshTangent(0, -1, 0),  Vertices.Num());
-	UV.Init(FVector2D(0, 0),  Vertices.Num());
-	VertexColors.Init(FColor::White,  Vertices.Num());
+	//Normals.Init(FVector(0, 0, 1), Vertices.Num());
+	//Tangents.Init(FRuntimeMeshTangent(0, 1, 0),  Vertices.Num());
+	//VertexColors.Init(FColor::White,  Vertices.Num());
 	//GenerateTriangles();
 	GenerateMesh();
 }
 
 void UMCube::GenerateVertices() {
-	for(int32 y = 0; y < Iterations; y++)
+	for(int32 y = 0; y < YScale; y++)
 	{
-		for(int32 x = 0; x < Iterations; x++)
+		for(int32 x = 0; x < XScale; x++)
 		{
-			for(int32 z = 0; z < Iterations; z++)
+			for(int32 z = 0; z < ZScale; z++)
 			{
 				FVector4 Points[8];
 				for(int i = 0; i < 8; i++)
@@ -53,10 +54,33 @@ void UMCube::GenerateVertices() {
 						int a2 = cornerIndexAFromEdge[triangulation[Index][i+2]];
 						int b2 = cornerIndexBFromEdge[triangulation[Index][i+2]];
 
+						FVector FirstVertice = InterpolateVerts(Points[a2], Points[b2]);
+						FVector SecondVertice = InterpolateVerts(Points[a1], Points[b1]);
+						FVector ThirdVertice = InterpolateVerts(Points[a0], Points[b0]);
 
-						Triangles.Add(Vertices.Add(InterpolateVerts(Points[a2], Points[b2])));
-						Triangles.Add(Vertices.Add(InterpolateVerts(Points[a1], Points[b1])));
-						Triangles.Add(Vertices.Add(InterpolateVerts(Points[a0], Points[b0])));
+						int FirstVerticeIndex = Vertices.Add(FirstVertice);
+						int SecondVerticeIndex = Vertices.Add(SecondVertice);
+						int ThirdVerticeIndex = Vertices.Add(ThirdVertice);
+
+						Triangles.Add(FirstVerticeIndex);
+						Triangles.Add(SecondVerticeIndex);
+						Triangles.Add(ThirdVerticeIndex);
+
+						UV.Add(FVector2D(x,y));
+						UV.Add(FVector2D(x,y));
+						UV.Add(FVector2D(x,y));
+
+						FVector Normal = FVector::CrossProduct(FirstVertice - ThirdVertice, SecondVertice - ThirdVertice).GetSafeNormal();
+						Normals.Add(Normal);
+						Normals.Add(Normal);
+						Normals.Add(Normal);
+
+						FVector Tanget = (FirstVertice - SecondVertice).GetSafeNormal2D();
+						Tangents.Add(Tanget);
+						Tangents.Add(Tanget);
+						Tangents.Add(Tanget);
+
+
 					}
 				}
 			}
@@ -75,13 +99,13 @@ int UMCube::GetTriangulationIndexForCube(int x, int y, int z, FVector4 (&PointsO
 	int Index = 0;
 	//      4--------5
 	//     /|       /|
-	//    / |      / |
-	//   7--------6  |
-	//   |  |     |  |
-	//   |  0-----|--1
-	//   | /      | /
-	//   |/       |/
-	//   3--------2
+	//    / |      / |               Z
+	//   7--------6  |               |
+	//   |  |     |  |               |
+	//   |  0-----|--1              []-------X
+	//   | /      | /               /
+	//   |/       |/               /
+	//   3--------2               Y
 
 	// 0
 	float Value = GetNoiseValueForGridCoordinates(x,y,z);

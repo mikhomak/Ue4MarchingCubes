@@ -25,7 +25,19 @@ public:
 	void GenerateMap();
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int Iterations;
+    int XScale;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int YScale;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int ZScale;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int XBorder;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int YBorder;
 
 	/** Array of the vertices of the object */
 	UPROPERTY(EditAnywhere , BlueprintReadWrite)
