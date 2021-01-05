@@ -1,5 +1,3 @@
-// Made by Liana Pigeot - https://github.com/nialna
-
 #pragma once
 
 #include "GameFramework/Actor.h"
@@ -26,31 +24,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GenerateMap();
 
-
-
-
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int PointsPerAxis;
-
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int NumPoints;
-
-
-   UPROPERTY(EditAnywhere , BlueprintReadWrite)
-   int Iterations;
-
-
-
-
-
-
-
-
-
-
-
-
-
+    int Iterations;
 
 	/** Array of the vertices of the object */
 	UPROPERTY(EditAnywhere , BlueprintReadWrite)
@@ -67,40 +42,29 @@ public:
 	float Scale;
 
 
-	int NoiseResolution = 300;
-	int TotalSizeToGenerate = 12000;
-	int NoiseSamplesPerLine = TotalSizeToGenerate / NoiseResolution;
-	int VerticesArraySize = NoiseSamplesPerLine * NoiseSamplesPerLine;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	float NoiseInputScale = 0.05; // Making this smaller will "stretch" the perlin noise terrain
-	float NoiseOutputScale = 2000; // Making this bigger will scale the terrain's height
 
 	/** */
 	UPerlinNoiseComponent* Noise;
 	URuntimeMeshComponentStatic* RuntimeMesh;
 
-	float Perlin3D(float x, float y, float z);
 
-	int32 GetTriangulationIndexForCube(int32 x, int32 y, int32 z,  FVector4 (&PointsOut)[8]);
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
+	int GetTriangulationIndexForCube(int x, int y, int z,  FVector4 (&PointsOut)[8]);
+
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	float Threshold;
 
     FVector InterpolateVerts(FVector4& FirstCorner, FVector4& SecondCorner);
 
 
-    void ConstructCube(FVector4 (&PointsOut)[8]);
-
 	void GenerateVertices();
 	void GenerateTriangles();
 	void GenerateMesh();
 
-	float GetNoiseValueForGridCoordinates(int x, int y);
-	float GetNoiseValueForGridCoordinates(int32 x, int32 y, int32 z);
-	int GetIndexForGridCoordinates(int x, int y);
-	int GetIndexForGridCoordinates(int x, int y, int z);
-	FVector2D GetPositionForGridCoordinates(int x, int y);
-	FVector GetPositionForGridCoordinates(int x, int y, int z);
+	float GetNoiseValueForGridCoordinates(int x, int y, int z);
 
 	// Other things needed to generate the mesh
 	TArray<FVector> Normals;
