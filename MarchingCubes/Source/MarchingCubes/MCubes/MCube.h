@@ -34,7 +34,10 @@ public:
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
     int NumPoints;
-    
+
+
+   UPROPERTY(EditAnywhere , BlueprintReadWrite)
+   int Iterations;
 
 
 

@@ -17,6 +17,8 @@ UMCube::UMCube()
 
 	PointsPerAxis = 30;
 	NumPoints = PointsPerAxis * PointsPerAxis * PointsPerAxis;
+
+	Iterations = 10;
 	// ...
 }
 
@@ -36,11 +38,11 @@ void UMCube::GenerateMap()
 
 void UMCube::GenerateVertices() {
 	//Vertices.Init(FVector(0, 0, 0), VerticesArraySize);
-	for(int32 y = 0; y < 10; y++)
+	for(int32 y = 0; y < Iterations; y++)
 	{
-		for(int32 x = 0; x < 10; x++)
+		for(int32 x = 0; x < Iterations; x++)
 		{
-			for(int32 z = 0; z < 10; z++)
+			for(int32 z = 0; z < Iterations; z++)
 			{
 				FVector4 Points[8];
 				for(int i = 0; i < 8; i++)
@@ -49,20 +51,26 @@ void UMCube::GenerateVertices() {
 				}
 				int Index = GetTriangulationIndexForCube(x, y, z, Points);
 
-
-				for(int32 i = 0; triangulation[Index][i] != -1; i +=3)
+				if(edgeTable[Index] != 0)
 				{
-					int a0 = cornerIndexAFromEdge[triangulation[Index][i]];
-					int b0 = cornerIndexBFromEdge[triangulation[Index][i]];
+					for(int32 i = 0; triangulation[Index][i] != -1; i +=3)
+					{
+						int a0 = cornerIndexAFromEdge[triangulation[Index][i]];
+						int b0 = cornerIndexBFromEdge[triangulation[Index][i]];
 
-					int a1 = cornerIndexAFromEdge[triangulation[Index][i+1]];
-					int b1 = cornerIndexBFromEdge[triangulation[Index][i+1]];
+						int a1 = cornerIndexAFromEdge[triangulation[Index][i+1]];
+						int b1 = cornerIndexBFromEdge[triangulation[Index][i+1]];
 
-					int a2 = cornerIndexAFromEdge[triangulation[Index][i+2]];
-					int b2 = cornerIndexBFromEdge[triangulation[Index][i+2]];
-					Triangles.Add(Vertices.Add(InterpolateVerts(Points[a0], Points[b0])));
-					Triangles.Add(Vertices.Add(InterpolateVerts(Points[a1], Points[b1])));
-					Triangles.Add(Vertices.Add(InterpolateVerts(Points[a2], Points[b2])));
+						int a2 = cornerIndexAFromEdge[triangulation[Index][i+2]];
+						int b2 = cornerIndexBFromEdge[triangulation[Index][i+2]];
+
+						const int FirstVertice = Vertices.Add(InterpolateVerts(Points[a2], Points[b2]));
+						const int SecondVertice = Vertices.Add(InterpolateVerts(Points[a1], Points[b1]));
+						const int ThirdVertice = Vertices.Add(InterpolateVerts(Points[a0], Points[b0]));
+						Triangles.Add(FirstVertice);
+						Triangles.Add(SecondVertice);
+						Triangles.Add(ThirdVertice);
+					}
 				}
 			}
 
@@ -142,9 +150,9 @@ void UMCube::ConstructCube(FVector4 (&PointsOut)[8])
 
 FVector UMCube::InterpolateVerts(FVector4& FirstCorner, FVector4& SecondCorner) {
     const float t = (Threshold - FirstCorner.W) / (SecondCorner.W - FirstCorner.W);
-	FirstCorner *= BoxLength;
-	SecondCorner *= BoxLength;
-    return FVector(FirstCorner + t * (SecondCorner - FirstCorner));
+	//FirstCorner *= BoxLength;
+	//SecondCorner *= BoxLength;
+    return FVector(FirstCorner + t * (SecondCorner - FirstCorner)) * BoxLength;
 }
 
 int UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z, FVector4 (&PointsOut)[8])
@@ -169,7 +177,7 @@ int UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z, FVector4 (&P
 	}
 	// 1
 	Value = GetNoiseValueForGridCoordinates(x + 1, y, z);
-	PointsOut[1] = FVector4(x + 1, y, z, Value);
+	PointsOut[1] = FVector4(x + 1, y , z, Value);
 	if(Value < Threshold)
 	{
 		Index |=  2;
@@ -183,20 +191,20 @@ int UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z, FVector4 (&P
 	}
 	// 3
 	Value = GetNoiseValueForGridCoordinates(x, y + 1, z);
-	PointsOut[3] = FVector4(x, y + 1, z, Value);
+	PointsOut[3] = FVector4(x , y + 1 , z, Value);
 	if(Value < Threshold)
 	{
 		Index |=  8;
 	}
 	// 4
 	Value = GetNoiseValueForGridCoordinates(x, y, z + 1);
-	PointsOut[4] = FVector4(x, y ,z, Value);
+	PointsOut[4] = FVector4(x, y ,z + 1, Value);
 	if(Value < Threshold)
 	{
 		Index |=  16;
 	}
 	// 5
-	Value = GetNoiseValueForGridCoordinates(x + 1,y ,z + 1);
+	Value = GetNoiseValueForGridCoordinates(x + 1,y  ,z + 1);
 	PointsOut[5] = FVector4(x + 1,y ,z + 1, Value);
 	if(Value < Threshold)
 	{
@@ -211,7 +219,7 @@ int UMCube::GetTriangulationIndexForCube(int32 x, int32 y, int32 z, FVector4 (&P
 	}
 	// 7
 	Value = GetNoiseValueForGridCoordinates(x,y + 1, z + 1);
-	PointsOut[7] = FVector4(x,y + 1, z + 1, Value);
+	PointsOut[7] = FVector4(x ,y + 1, z + 1, Value);
 	if(Value < Threshold)
 	{
 		Index |= 128;

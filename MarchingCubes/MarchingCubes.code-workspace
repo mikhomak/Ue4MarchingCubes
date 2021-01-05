@@ -19,7 +19,9 @@
 			"map": "cpp",
 			"set": "cpp",
 			"vector": "cpp",
-			"*.ipp": "cpp"
+			"*.ipp": "cpp",
+			"__config": "cpp",
+			"__nullptr": "cpp"
 		}
 	},
 	"extensions": {
