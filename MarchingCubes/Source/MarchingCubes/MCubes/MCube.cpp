@@ -12,6 +12,12 @@ UMCube::UMCube()
 	XScale = 30;
 	ZScale = 30;
 	YScale = 30;
+
+	XBorderLerp = 5;
+	YBorderLerp = 5;
+	ZBorderLerp = 0;
+
+	AddedBorderLerp = 0.6f;
 }
 
 
@@ -185,11 +191,20 @@ void UMCube::GenerateMesh() {
 
 
 float UMCube::GetNoiseValueForGridCoordinates(int x, int y, int z) {
-	return Noise->GetValue(
+	if(x == 0 || x >= XScale || y == 0 || y >= YScale || z == 0 || z >= ZScale)
+	{
+		return 0.f;
+	}
+	float Res = Noise->GetValue(
 		(x * NoiseInputScale),
 		(y * NoiseInputScale),
 		(z * NoiseInputScale)
-	) * Scale;
+	);
+	if(x >= XScale - XBorderLerp || y >= YScale - YBorderLerp )
+	{
+		Res -= AddedBorderLerp;
+	}
+	return Res * Scale;
 }
 
 

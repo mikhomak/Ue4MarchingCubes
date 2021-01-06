@@ -34,10 +34,16 @@ public:
     int ZScale;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int XBorder;
+    int XBorderLerp;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int YBorder;
+    int YBorderLerp;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int ZBorderLerp;
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+    int AddedBorderLerp;
 
 	/** Array of the vertices of the object */
 	UPROPERTY(EditAnywhere , BlueprintReadWrite)
