@@ -200,7 +200,7 @@ public:
 
 	/**
      * OPTIONAL
-     * Normals for every VERTICES(not triangle)
+     * Normals for each VERTICE(not triangle)
      * Being set in GenerateMesh
      * @warning - must be same length as Vertices array
      */
@@ -208,7 +208,7 @@ public:
 
     /**
      * OPTIONAL
-     * Tangets for every VERTICES(not triangle)
+     * Tangets for each VERTICE(not triangle)
      * Being set in GenerateMesh
      * @warning - must be same length as Vertices array
      */
@@ -216,7 +216,7 @@ public:
 
     /**
      * OPTIONAL
-     * Normals for every VERTICES(not triangle)
+     * Normals for each VERTICE(not triangle)
      * Being set in GenerateMesh
      * @warning - must be same length as Vertices array
      */
@@ -224,7 +224,7 @@ public:
 
     /**
      * OPTIONAL
-     * Normals for every VERTICES(not triangle)
+     * Normals for each VERTICE(not triangle)
      * Being set in GenerateMesh
      * @warning - must be same length as Vertices array
      */
