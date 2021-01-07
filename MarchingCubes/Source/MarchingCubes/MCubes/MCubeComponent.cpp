@@ -32,14 +32,7 @@ void UMCubeComponent::GenerateMarchingCubeMesh(int X_Iterations, int Y_Iteration
 	Z_Iterations = ZScale;
 	BoxLength = _BoxLength;
 
-	/* Deletes previos mesh */
-	//RuntimeMesh->ClearSection(0,0);
-
 	GenerateVertices();
-	//Normals.Init(FVector(0, 0, 1), Vertices.Num());
-	//Tangents.Init(FRuntimeMeshTangent(0, 1, 0),  Vertices.Num());
-	//VertexColors.Init(FColor::White,  Vertices.Num());
-	//GenerateTriangles();
 	GenerateMesh();
 }
 
@@ -183,7 +176,8 @@ int UMCubeComponent::GetTriangulationIndexForCube(int x, int y, int z, FVector4 
 	return Index;
 }
 
-void UMCubeComponent::GenerateMesh() {
+void UMCubeComponent::GenerateMesh()
+{
 	RuntimeMesh->CreateSectionFromComponents(0,
 		0,
 		0,
@@ -195,6 +189,7 @@ void UMCubeComponent::GenerateMesh() {
 		Tangents,
 		ERuntimeMeshUpdateFrequency::Infrequent,
 		true);
+
 }
 
 

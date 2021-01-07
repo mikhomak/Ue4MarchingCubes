@@ -57,8 +57,8 @@ public:
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
 	int Seed;
 
-
-
+private:
+    bool bFirstCreated;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

@@ -65,7 +65,9 @@ public:
 	float NoiseInputScale = 0.05; // Making this smaller will "stretch" the perlin noise terrain
 
 	/** */
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	UPerlinNoiseComponent* Noise;
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	URuntimeMeshComponentStatic* RuntimeMesh;
 
 
