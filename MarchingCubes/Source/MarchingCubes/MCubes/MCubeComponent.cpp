@@ -13,11 +13,6 @@ UMCubeComponent::UMCubeComponent()
 	ZScale = 30;
 	YScale = 30;
 
-	XBorderLerp = 5;
-	YBorderLerp = 5;
-	ZBorderLerp = 0;
-
-	AddedBorderLerp = 0.6f;
 }
 
 
@@ -32,11 +27,11 @@ void UMCubeComponent::GenerateMarchingCubeMesh(int X_Iterations, int Y_Iteration
 	Z_Iterations = ZScale;
 	BoxLength = _BoxLength;
 
-	GenerateVertices();
+	GenerateMeshData();
 	GenerateMesh();
 }
 
-void UMCubeComponent::GenerateVertices() {
+void UMCubeComponent::GenerateMeshData() {
 	for(int32 y = 0; y < YScale; y++)
 	{
 		for(int32 x = 0; x < XScale; x++)
@@ -117,56 +112,56 @@ int UMCubeComponent::GetTriangulationIndexForCube(int x, int y, int z, FVector4 
 	//   3--------2               Y
 
 	// 0
-	float Value = GetNoiseValueForGridCoordinates(x,y,z);
+	float Value = GetNoiseValueForCoordinates(x,y,z);
 	PointsOut[0] = FVector4(x, y ,z, Value);
 	if(Value < Threshold)
 	{
 		Index |=  1;
 	}
 	// 1
-	Value = GetNoiseValueForGridCoordinates(x + 1, y, z);
+	Value = GetNoiseValueForCoordinates(x + 1, y, z);
 	PointsOut[1] = FVector4(x + 1, y , z, Value);
 	if(Value < Threshold)
 	{
 		Index |=  2;
 	}
 	// 2
-	Value = GetNoiseValueForGridCoordinates(x + 1, y + 1, z);
+	Value = GetNoiseValueForCoordinates(x + 1, y + 1, z);
 	PointsOut[2] = FVector4(x + 1, y + 1, z, Value);
 	if(Value < Threshold)
 	{
 		Index |=  4;
 	}
 	// 3
-	Value = GetNoiseValueForGridCoordinates(x, y + 1, z);
+	Value = GetNoiseValueForCoordinates(x, y + 1, z);
 	PointsOut[3] = FVector4(x , y + 1 , z, Value);
 	if(Value < Threshold)
 	{
 		Index |=  8;
 	}
 	// 4
-	Value = GetNoiseValueForGridCoordinates(x, y, z + 1);
+	Value = GetNoiseValueForCoordinates(x, y, z + 1);
 	PointsOut[4] = FVector4(x, y ,z + 1, Value);
 	if(Value < Threshold)
 	{
 		Index |=  16;
 	}
 	// 5
-	Value = GetNoiseValueForGridCoordinates(x + 1,y  ,z + 1);
+	Value = GetNoiseValueForCoordinates(x + 1,y  ,z + 1);
 	PointsOut[5] = FVector4(x + 1,y ,z + 1, Value);
 	if(Value < Threshold)
 	{
 		Index |=  32;
 	}
 	// 6
-	Value = GetNoiseValueForGridCoordinates(x + 1, y + 1, z + 1);
+	Value = GetNoiseValueForCoordinates(x + 1, y + 1, z + 1);
 	PointsOut[6] = FVector4(x + 1, y + 1, z + 1, Value);
 	if(Value < Threshold)
 	{
 		Index |= 64;
 	}
 	// 7
-	Value = GetNoiseValueForGridCoordinates(x,y + 1, z + 1);
+	Value = GetNoiseValueForCoordinates(x,y + 1, z + 1);
 	PointsOut[7] = FVector4(x ,y + 1, z + 1, Value);
 	if(Value < Threshold)
 	{
@@ -178,6 +173,10 @@ int UMCubeComponent::GetTriangulationIndexForCube(int x, int y, int z, FVector4 
 
 void UMCubeComponent::GenerateMesh()
 {
+	if(RuntimeMesh == nullptr)
+	{
+		return;
+	}
 	RuntimeMesh->CreateSectionFromComponents(0,
 		0,
 		0,
@@ -195,7 +194,7 @@ void UMCubeComponent::GenerateMesh()
 
 
 
-float UMCubeComponent::GetNoiseValueForGridCoordinates(int x, int y, int z) {
+float UMCubeComponent::GetNoiseValueForCoordinates(int x, int y, int z) {
 	if(x == 0 || x >= XScale || y == 0 || y >= YScale || z == 0 || z >= ZScale)
 	{
 		return 0.f;
@@ -213,9 +212,6 @@ float UMCubeComponent::GetNoiseValueForGridCoordinates(int x, int y, int z) {
 void UMCubeComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	//Noise = Cast<UPerlinNoiseComponent>(GetOwner()->GetComponentByClass(UPerlinNoiseComponent::StaticClass()));
-	//RuntimeMesh = Cast<URuntimeMeshComponentStatic>(GetOwner()->GetComponentByClass(URuntimeMeshComponentStatic::StaticClass()));
-
 }
 
 

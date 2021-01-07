@@ -51,6 +51,7 @@ void AMCubeActor::GenerateMesh()
 void AMCubeActor::BeginPlay()
 {
 	Super::BeginPlay();
+    GenerateMesh();
 }
 
 

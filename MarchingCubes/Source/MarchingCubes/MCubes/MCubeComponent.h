@@ -8,7 +8,10 @@
 #include "Components/ActorComponent.h"
 #include "MCubeComponent.generated.h"
 
-
+/**
+ * Component to creates a rectangular shape object filled of marching cubes
+ * @warning requires UPerlinNoiseComponent and URuntimeMeshComponentStatic (Noise and RuntimeMesh) to be set before using this component
+ */
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UMCubeComponent : public UActorComponent
 {
@@ -17,79 +20,214 @@ class UMCubeComponent : public UActorComponent
 public:
 	UMCubeComponent();
 
+    // -----------------------------------------------------------------------------------------------------------
+	// NEEDED COMPONENTS
+	// -----------------------------------------------------------------------------------------------------------
+
+
+    /**
+     * Noise component to get values for each 3D point
+     * @warning should be set in order for this component to work
+    */
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+	UPerlinNoiseComponent* Noise;
+
+    /**
+     * Runtime mesh component for creating a mesh
+     * @warning should be set in order for this component to work
+     */
+    UPROPERTY(EditAnywhere , BlueprintReadWrite)
+	URuntimeMeshComponentStatic* RuntimeMesh;
+
+    // -----------------------------------------------------------------------------------------------------------
+	// MAIN METHOD
+	// -----------------------------------------------------------------------------------------------------------
+
 	/**
-	 * Generates marching cube object
-	 * To configure the object, change the params (listed below) before calling this method
+	 * Main method to generate a 3D perlin noise via marching cubes
+     * It will create a rectangular shape object filled of marching cubes
+	 * Before calling this method make sure that you configure the PerlinNoise and called SetRandomSeed() by it
+     * The volume of the mesh is (X * Y * Z) * BoxLength
+     * @param X_Iterations - amount of cubes along x axis
+     * @param Y_Iterations - amount of cubes along y axis
+     * @param Y_Iterations - amount of cubes along z axis
+     * @param _BoxLength - Length of each cube's edges
+     * @warning This method requires UPerlinNoiseComponent and URuntimeMeshComponentStatic to be set as Noise and RuntimeMesh accordingly
 	 */
 	UFUNCTION(BlueprintCallable)
 	void GenerateMarchingCubeMesh(int X_Iterations, int Y_Iterations, int Z_Iterations, float _BoxLength);
 
+    // -----------------------------------------------------------------------------------------------------------
+	// NOISE/MESH PARAMS
+	// -----------------------------------------------------------------------------------------------------------
+
+    /**
+     * Amout of cubes along x axis
+     * Sets this value in GenerateMarchingCubeMesh() method
+     */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
     int XScale;
 
+    /**
+     * Amout of cubes along y axis
+     * Sets this value in GenerateMarchingCubeMesh() method
+     */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
     int YScale;
 
+    /**
+     * Amout of cubes along z axis
+     * Sets this value in GenerateMarchingCubeMesh() method
+     */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
     int ZScale;
 
+    /**
+     * The length of the cube's edge
+     * Sets this value in GenerateMarchingCubeMesh() method
+     */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int XBorderLerp;
-
-    UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int YBorderLerp;
-
-    UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int ZBorderLerp;
-
-    UPROPERTY(EditAnywhere , BlueprintReadWrite)
-    int AddedBorderLerp;
-
-	/** Array of the vertices of the object */
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
-	TArray<FVector> Vertices;
-
-	/** Array of the triangled of the object. Index is the */
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
-	TArray<int> Triangles;
-
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	float BoxLength;
 
+
+    /** Scale value for the noise value for each 3D point (Noise value will be multiplied by it) */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	float Scale;
 
-
-
+    /**
+     * Reducing the valeue among each axis while getting the noise value
+     * Making this smaller will "stretch" the perlin noise terrain
+    */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
-	float NoiseInputScale = 0.05; // Making this smaller will "stretch" the perlin noise terrain
-
-	/** */
-    UPROPERTY(EditAnywhere , BlueprintReadWrite)
-	UPerlinNoiseComponent* Noise;
-    UPROPERTY(EditAnywhere , BlueprintReadWrite)
-	URuntimeMeshComponentStatic* RuntimeMesh;
+	float NoiseInputScale = 0.05;
 
 
+    // -----------------------------------------------------------------------------------------------------------
+	// MESH GENERATION
+	// -----------------------------------------------------------------------------------------------------------
+
+
+    /**
+     * Main method to generate mesh related data
+     * GENERATES : VERTICES, TRIANGLES, UVS, NORMALS, TANGENTS
+     * Itterates through all XYZ scales to calculate every cube
+     * Creates index for the cube(by GetTriangulationIndexForCube() method)
+     * If the index is valid, gets the configuration and using it to create vertices, triangles, uvs, normals and tangetns for this cube
+     */
+	UFUNCTION(BlueprintCallable)
+	void GenerateMeshData();
+
+    /**
+     * Last method to invoke
+     * Generates mesh in RuntimeMesh by using following arrays: Vertices, Triangles, Normals, Tangents, UV, VertesColors
+     * @warning requires URuntimeMeshComponentStatic
+     * @warning currently(07/01/2021) there is a bug of replacing the mesh in RuntimeMeshComponent see (https://github.com/TriAxis-Games/RuntimeMeshComponent/issues/194)
+     */
+	UFUNCTION(BlueprintCallable)
+    void GenerateMesh();
+
+
+    // -----------------------------------------------------------------------------------------------------------
+	// CUBE GENERATION
+	// -----------------------------------------------------------------------------------------------------------
+
+
+    /**
+     * Okay this one is a lil bit difficult
+     * Read this article first - http://paulbourke.net/geometry/polygonise/
+     * There is a table triangulation of all posible configuration of the cube (2^8 or 256 in total)
+     * To get the configuration for a cube we need to iterate among all of 8 vertices of the cube and get the noise value for each one(to get a noise value we use GetNoiseValueForCoordinates())
+     * If noise value is below Threshold than we consider this vertice as valid
+     * If the vertice is valid, we should update the TriangulationIndex to get the right configuration for the cube
+     * The index is in range 0-255, or we can represent it as 8 bits
+     * If one of the vertices of the cube is considered to be valued(its Noise value < Threshold), we replace the corresponding bit 0 by 1. By doing that we can easely create the index to get the configration from the table later. It's really dope
+     * Also filling PointOut array for each vertice of the cube (Position + Noise Value)
+     * It's not necessary that those vertices are added to Vertices array. See InterpolateVerts() and GenerateMeshData() methods
+     * @param x - x index value of the cube. It's not the world/relative positiion! It's an index position from 0 to XScale
+     * @param y - y index value of the cube. It's not the world/relative positiion! It's an index position from 0 to YScale
+     * @param z - z index value of the cube. It's not the world/relative positiion! It's an index position from 0 to ZScale
+     * @param PointsOut - filling array of vertices for the current cube. First three values are the index values xyz. The fourth value is the noise value.
+     * @return - index of for the cube to use in a triangulation table to get the configuration for this cube.
+     */
+	UFUNCTION(BlueprintCallable)
 	int GetTriangulationIndexForCube(int x, int y, int z,  FVector4 (&PointsOut)[8]);
 
+    /**
+     * Getting noise value for coordinates
+     * @return noise value
+     * @warning - XYZ are indexes, not world/relative positions!
+     */
+	UFUNCTION(BlueprintCallable)
+	float GetNoiseValueForCoordinates(int x, int y, int z);
 
+    /**
+     * Threshold value to calculate if the vertice if valid
+     * It is considered valid if the Noise Value of the vertice < Threshold
+     */
     UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	float Threshold;
 
+    /**
+     * Intrepolate point beetwen two vertices of the cube
+     * If two vertices are valid, we need to find a point on the edge where we should create an actual vertice
+     * @param FirstCorner - contains XYZ index and NoiseValue
+     * @param SecondCorner - contains XYZ index and NoiseValue
+     * @return - actual vetice to add to the Vertices (now its relative position, not the indexes!)
+    */
+	UFUNCTION(BlueprintCallable)
     FVector InterpolateVerts(FVector4& FirstCorner, FVector4& SecondCorner);
 
 
-	void GenerateVertices();
-	void GenerateTriangles();
-	void GenerateMesh();
+    // -----------------------------------------------------------------------------------------------------------
+	// MESH DATA ARRAYS
+	// -----------------------------------------------------------------------------------------------------------
 
-	float GetNoiseValueForGridCoordinates(int x, int y, int z);
+	/**
+     * Array of Vertices of the mesh
+     * Sadly we cannot know the amount of vertices before generationg the mesh so yeah that stinks
+     */
+	UPROPERTY(EditAnywhere , BlueprintReadOnly)
+	TArray<FVector> Vertices;
 
-	// Other things needed to generate the mesh
+	/**
+     * Array of triangles
+     * Length must be a multiple of 3
+     * Each elemet represents the index of a vertice in order to make a full triangle
+     * EX: Triangles[0], Triangles[1], Triangles[2] will be used to create a triangle based on Vertices[0], Vertices[1] and Vertices[2] accordingly
+     */
+	UPROPERTY(EditAnywhere , BlueprintReadOnly)
+	TArray<int> Triangles;
+
+	/**
+     * OPTIONAL
+     * Normals for every VERTICES(not triangle)
+     * Being set in GenerateMesh
+     * @warning - must be same length as Vertices array
+     */
 	TArray<FVector> Normals;
+
+    /**
+     * OPTIONAL
+     * Tangets for every VERTICES(not triangle)
+     * Being set in GenerateMesh
+     * @warning - must be same length as Vertices array
+     */
 	TArray<FRuntimeMeshTangent> Tangents;
-	TArray<FVector2D> UV;
+
+    /**
+     * OPTIONAL
+     * Normals for every VERTICES(not triangle)
+     * Being set in GenerateMesh
+     * @warning - must be same length as Vertices array
+     */
+    TArray<FVector2D> UV;
+
+    /**
+     * OPTIONAL
+     * Normals for every VERTICES(not triangle)
+     * Being set in GenerateMesh
+     * @warning - must be same length as Vertices array
+     */
 	TArray<FColor> VertexColors;
 
 protected:
@@ -100,7 +238,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+    // -----------------------------------------------------------------------------------------------------------
+	// TABLES
+	// -----------------------------------------------------------------------------------------------------------
 
+    /** Triagnluation table of configuration for cubes */
     int triangulation[256][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     { 0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
