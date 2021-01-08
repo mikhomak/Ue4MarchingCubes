@@ -2,7 +2,8 @@
 ![](https://raw.githubusercontent.com/mikhomak/Images/master/MarchinCubes/3D%20Perlin%20Noise.png)
 
 ## About:
-This component allows you to generate 3D Perlin Noise mesh with collisions in runtime in unreal engine.
+This component allows you to generate 3D Perlin Noise mesh with collisions in runtime in unreal engine.    
+![](https://github.com/mikhomak/Images/blob/master/MarchinCubes/gifPreview.gif)
 
 ## Requirements:
 
