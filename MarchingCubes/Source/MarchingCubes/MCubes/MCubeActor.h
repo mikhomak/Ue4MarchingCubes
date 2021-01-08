@@ -6,6 +6,11 @@
 #include "PerlinNoiseComponent.h"
 #include "MCubeActor.generated.h"
 
+/**
+ * Example actor to generate 3D Perlin Noise mesh
+ * Generates Mesh at the BeginPlay
+ * @warning currently(07/01/2021) there is a bug of replacing the mesh in RuntimeMeshComponent see (https://github.com/TriAxis-Games/RuntimeMeshComponent/issues/194)
+ */
 UCLASS()
 class AMCubeActor : public AActor
 {
@@ -13,6 +18,10 @@ class AMCubeActor : public AActor
 
 public:
 	AMCubeActor();
+
+	// -----------------------------------------------------------------------------------------------------------
+	// Components
+	// -----------------------------------------------------------------------------------------------------------
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
     class URuntimeMeshComponentStatic* RuntimeMesh;
@@ -23,10 +32,15 @@ public:
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
     class UMCubeComponent* MCube;
 
-    UFUNCTION(BlueprintCallable)
+	// -----------------------------------------------------------------------------------------------------------
+	// Generate Mesh method
+	// -----------------------------------------------------------------------------------------------------------
+	UFUNCTION(BlueprintCallable)
     void GenerateMesh();
 
-
+	// -----------------------------------------------------------------------------------------------------------
+	// Meshes size attributes
+	// -----------------------------------------------------------------------------------------------------------
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube")
     float BoxLength;
 
@@ -39,7 +53,10 @@ public:
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube")
     int ZLength;
 
-    UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
+	// -----------------------------------------------------------------------------------------------------------
+	// Noise attributes
+	// -----------------------------------------------------------------------------------------------------------
+	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
     float Frequency;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
@@ -57,8 +74,6 @@ public:
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
 	int Seed;
 
-private:
-    bool bFirstCreated;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

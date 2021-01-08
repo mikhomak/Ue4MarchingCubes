@@ -1,4 +1,3 @@
-
 #include "MCubeActor.h"
 #include "MCubeComponent.h"
 #include "PerlinNoiseComponent.h"
@@ -10,7 +9,8 @@ AMCubeActor::AMCubeActor()
     RootComponent = RuntimeMesh;
 
     /* Setting the attachment rules */
-    const FAttachmentTransformRules AttachmentTransformRules = FAttachmentTransformRules(EAttachmentRule::KeepRelative, true);
+    const FAttachmentTransformRules AttachmentTransformRules = FAttachmentTransformRules(
+        EAttachmentRule::KeepRelative, true);
 
     /* Creates Perlin Noise Component */
     Noise = CreateDefaultSubobject<UPerlinNoiseComponent>(TEXT("Perlin Noise Component"));
@@ -50,12 +50,12 @@ void AMCubeActor::GenerateMesh()
 
 void AMCubeActor::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
     GenerateMesh();
 }
 
 
 void AMCubeActor::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
+    Super::Tick(DeltaSeconds);
 }
