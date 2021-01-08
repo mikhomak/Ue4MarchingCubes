@@ -41,3 +41,7 @@ YES, but you can disable them in *MCubeComponent.cpp* `    RuntimeMesh->CreateSe
 **2) Can you use it as a Terrain?**   
 Yeap, but I recomend you for this purpouse to use [Voxel plugin](https://www.unrealengine.com/marketplace/en-US/product/voxel-plugin-free) which is cool as shit
 
+## Credits:
+* Thanks a lot to all the people who created/contributed to [RuntimeMeshComponent](https://github.com/TriAxis-Games/RuntimeMeshComponent)
+* Thanks a lot to [nialna](https://github.com/nialna) for her blogs and [PerlinNoiseComponent](https://github.com/nialna/PerlinNoiseComponent)
+* Thanks a lot to Paul Bourke for the [marching cubes article](http://paulbourke.net/geometry/polygonise/)
