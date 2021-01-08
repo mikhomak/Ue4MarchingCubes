@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,16 +13,16 @@
 UCLASS()
 class AMCubeActor : public AActor
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	AMCubeActor();
+    AMCubeActor();
 
-	// -----------------------------------------------------------------------------------------------------------
-	// Components
-	// -----------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------
+    // Components
+    // -----------------------------------------------------------------------------------------------------------
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
     class URuntimeMeshComponentStatic* RuntimeMesh;
 
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
@@ -32,15 +31,17 @@ public:
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
     class UMCubeComponent* MCube;
 
-	// -----------------------------------------------------------------------------------------------------------
-	// Generate Mesh method
-	// -----------------------------------------------------------------------------------------------------------
-	UFUNCTION(BlueprintCallable)
+    // -----------------------------------------------------------------------------------------------------------
+    // Generate Mesh method
+    // -----------------------------------------------------------------------------------------------------------
+
+    UFUNCTION(BlueprintCallable)
     void GenerateMesh();
 
-	// -----------------------------------------------------------------------------------------------------------
-	// Meshes size attributes
-	// -----------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------
+    // Meshes size attributes
+    // -----------------------------------------------------------------------------------------------------------
+
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube")
     float BoxLength;
 
@@ -53,33 +54,33 @@ public:
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube")
     int ZLength;
 
-	// -----------------------------------------------------------------------------------------------------------
-	// Noise attributes
-	// -----------------------------------------------------------------------------------------------------------
-	UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
+    // -----------------------------------------------------------------------------------------------------------
+    // Noise attributes
+    // -----------------------------------------------------------------------------------------------------------
+
+    UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
     float Frequency;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
     float Lacunarity;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
-	TEnumAsByte<qualities::PerlinNoiseQuality> NoiseQuality;
+    TEnumAsByte<qualities::PerlinNoiseQuality> NoiseQuality;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
-	int OctaveCount;
+    int OctaveCount;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
-	float Persistence;
+    float Persistence;
 
     UPROPERTY(EditAnywhere , BlueprintReadWrite, Category = "Marching cube|Noise")
-	int Seed;
+    int Seed;
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+    // Called when the game starts
+    virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaSeconds) override;
-
+    // Called every frame
+    virtual void Tick(float DeltaSeconds) override;
 };
